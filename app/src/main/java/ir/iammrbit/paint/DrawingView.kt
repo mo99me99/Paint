@@ -20,6 +20,8 @@ class DrawingView(context: Context , attrs : AttributeSet)
     private var mBrushSize : Float = 1F
     var color = Color.BLACK
     private var canvas: Canvas? = null
+    private val mPaths = ArrayList<CustomPath>()
+
 
     init {
         setUpDrawing()
@@ -48,6 +50,13 @@ class DrawingView(context: Context , attrs : AttributeSet)
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawBitmap(mCanvasBitMap!! ,0F,0F  , mCanvasPaint)
+
+        for (path in mPaths){
+            mDrawPaint!!.strokeWidth = path!!.brushThickness
+            mDrawPaint!!.color = path!!.color
+            canvas.drawPath(path!!, mDrawPaint!!)
+        }
+
         if (!mDrawPath!!.isEmpty) {
             mDrawPaint!!.strokeWidth = mDrawPath!!.brushThickness
             mDrawPaint!!.color = mDrawPath!!.color
@@ -71,6 +80,7 @@ class DrawingView(context: Context , attrs : AttributeSet)
                 mDrawPath!!.lineTo(touchX!! ,touchY!! )
             }
             MotionEvent.ACTION_UP -> {
+                mPaths.add(mDrawPath!!)
                 mDrawPath = CustomPath(color, mBrushSize )
             }
             else -> return false
