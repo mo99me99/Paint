@@ -6,6 +6,9 @@ plugins {
 android {
     namespace 'ir.iammrbit.paint'
     compileSdk 33
+    buildFeatures {
+        viewBinding = true
+    }
 
     defaultConfig {
         applicationId "ir.iammrbit.paint"
