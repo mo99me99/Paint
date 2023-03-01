@@ -17,6 +17,8 @@ class MainActivity : AppCompatActivity() {
 
     private var mImageButtonCurrentPaint : ImageButton? = null
 
+//    TODO private var mImageButtonCurrentBrushSize : ImageButton? = null
+
     private lateinit var binding: ActivityMainBinding
 
 
