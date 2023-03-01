@@ -97,6 +97,7 @@ class DrawingView(context: Context , attrs : AttributeSet)
         mDrawPaint!!.strokeWidth = mBrushSize
     }
 
+
     internal inner class CustomPath(var color: Int , var brushThickness : Float)
         : android.graphics.Path(){
 
