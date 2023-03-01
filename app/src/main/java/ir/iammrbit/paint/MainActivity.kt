@@ -4,8 +4,10 @@ import android.app.Dialog
 import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import ir.iammrbit.paint.databinding.ActivityMainBinding
@@ -63,5 +65,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         brushDialog.show()
+    }
+
+    fun paintClicked(view :View){
+//        Toast.makeText(this , "Clicked paint " , Toast.LENGTH_SHORT).show()
+        if (view == mImageButtonCurrentPaint)
+            return //do nothing
+        val imageButton = view as ImageButton
+        val colorTag = imageButton.tag.toString()
+        drawingView?.setColor(colorTag)
+        imageButton.setImageDrawable(
+            ContextCompat.getDrawable(this , R.drawable.pallet_pressed)
+        )
+        mImageButtonCurrentPaint?.setImageDrawable(ContextCompat.getDrawable(this , R.drawable.pallet_normal))
+        mImageButtonCurrentPaint = view
+
     }
 }
