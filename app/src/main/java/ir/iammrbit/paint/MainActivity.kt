@@ -1,25 +1,51 @@
 package ir.iammrbit.paint
 
 import android.app.Dialog
-import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import android.Manifest
+import androidx.core.app.ActivityCompat
 import ir.iammrbit.paint.databinding.ActivityMainBinding
 
+//    TODO private var mImageButtonCurrentBrushSize : ImageButton? = null
 class MainActivity : AppCompatActivity() {
     private var drawingView:DrawingView? = null
-
     private var mImageButtonCurrentPaint : ImageButton? = null
 
-//    TODO private var mImageButtonCurrentBrushSize : ImageButton? = null
+    private val requestPermission : ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
+            permissions ->
+                permissions.entries.forEach{
+                    val permissionName = it.key
+                    val isGranted = it.value
+                    if (isGranted){
+                        Toast.makeText(
+                            this ,
+                            "Permission granted. Now you can read the storage files."
+                            ,Toast.LENGTH_SHORT)
+                            .show()
+                    }else{
+                        if (permissionName == Manifest.permission.READ_EXTERNAL_STORAGE){
+                            Toast.makeText(
+                                this
+                                , "Oops you just didn't accept the permission."
+                                ,Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                }
+        }
 
     private lateinit var binding: ActivityMainBinding
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +66,26 @@ class MainActivity : AppCompatActivity() {
             showBrushSizeChooserDialog()
         }
 
+        val ibGallery : ImageButton = binding.ibGallery
+        ibGallery.setOnClickListener {
+        requestStoragePermission()
+        }
 
+
+
+
+    }
+    private fun requestStoragePermission(){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this
+            ,Manifest.permission.READ_EXTERNAL_STORAGE)
+        ){
+            showRationalDialog("Paint" , "Paint needs to Access your External Storage")
+        }else{
+            requestPermission.launch(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ))//TODO - add writing external storage
+        }
     }
 
     private fun showBrushSizeChooserDialog(){
@@ -83,4 +128,27 @@ class MainActivity : AppCompatActivity() {
         mImageButtonCurrentPaint = view
 
     }
+    private fun showRationalDialog(
+        title : String,
+        message : String
+    ){
+        val builder : AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Cancel"){dialog , _-> dialog.dismiss()}
+        builder.create().show()
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
