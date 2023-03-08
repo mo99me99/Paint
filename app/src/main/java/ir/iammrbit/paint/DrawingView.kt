@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import java.util.Stack
 
 
 class DrawingView(context: Context , attrs : AttributeSet)
@@ -21,11 +22,25 @@ class DrawingView(context: Context , attrs : AttributeSet)
     private var mBrushSize : Float = 1F
     var color = Color.BLACK
     private var canvas: Canvas? = null
-    private val mPaths = ArrayList<CustomPath>()
+    private val mPaths = Stack<CustomPath>()
+    private val mUndoPaths = Stack<CustomPath>()
 
 
     init {
         setUpDrawing()
+    }
+
+    fun onClickUndo(){
+        if (mPaths.isNotEmpty()){
+            mUndoPaths.push(mPaths.pop())
+            invalidate()
+        }
+    }
+    fun onClickRedo(){
+        if (mUndoPaths.isNotEmpty()) {
+            mPaths.push(mUndoPaths.pop())
+            invalidate()
+        }
     }
 
 

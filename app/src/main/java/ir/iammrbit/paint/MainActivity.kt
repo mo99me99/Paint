@@ -61,9 +61,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     private lateinit var binding: ActivityMainBinding
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -84,7 +81,15 @@ class MainActivity : AppCompatActivity() {
 
         val ibGallery : ImageButton = binding.ibGallery
         ibGallery.setOnClickListener {
-        requestStoragePermission()
+            requestStoragePermission()
+        }
+        val ibUndo : ImageButton = binding.ibUndo
+        ibUndo.setOnClickListener {
+            drawingView?.onClickUndo()
+        }
+        val ibRedo : ImageButton = binding.ibRedo
+        ibRedo.setOnClickListener {
+            drawingView?.onClickRedo()
         }
 
 
