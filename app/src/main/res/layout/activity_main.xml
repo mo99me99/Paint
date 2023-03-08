@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
-            android:src="@drawable/f7a61lwo"
+            tools:src="@drawable/f7a61lwo"
             />
 
         <ir.iammrbit.paint.DrawingView
@@ -155,14 +155,6 @@
         android:src="@drawable/ic_brush_icon"
         android:scaleType="fitXY"
         />
-    <ImageButton
-        android:id="@+id/ib_gallery"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="5dp"
-        android:src="@drawable/ic_gallery_icon"
-        android:scaleType="fitCenter"
-        />
         <ImageButton
             android:id="@+id/ib_undo"
             android:layout_width="50dp"
@@ -180,6 +172,23 @@
             android:scaleType="centerCrop"
 
             />
+    <ImageButton
+        android:id="@+id/ib_gallery"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:src="@drawable/ic_gallery_icon"
+        android:scaleType="fitCenter"
+        />
+        <ImageButton
+            android:id="@+id/ib_save"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_save"
+            android:scaleType="centerCrop"
+            />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

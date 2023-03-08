@@ -1,25 +1,42 @@
 package ir.iammrbit.paint
 
+import android.Manifest
 import android.app.Dialog
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
-import android.Manifest
-import android.content.Intent
-import android.provider.MediaStore
-import android.widget.ImageView
-import androidx.core.app.ActivityCompat
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.coroutineScope
 import ir.iammrbit.paint.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+
 
 //    TODO private var mImageButtonCurrentBrushSize : ImageButton? = null
 class MainActivity : AppCompatActivity() {
+    val LifecycleOwner.lifecycleScope: LifecycleCoroutineScope
+        get() = lifecycle.coroutineScope
     private var drawingView:DrawingView? = null
     private var mImageButtonCurrentPaint : ImageButton? = null
     private val openGalleryLauncher : ActivityResultLauncher<Intent> =
@@ -91,10 +108,25 @@ class MainActivity : AppCompatActivity() {
         ibRedo.setOnClickListener {
             drawingView?.onClickRedo()
         }
+        val saveBtn : ImageButton = binding.ibSave
+        saveBtn.setOnClickListener {
+            if (isReadStorageAllowed()){
+                lifecycleScope.launch{
+                    val flDrawingView:FrameLayout = binding.flDrawingViewContainer
+                    saveBitMapFile(getBitMapFromView(flDrawingView))
+                }
+            }
+        }
 
 
 
 
+    }
+
+    private fun isReadStorageAllowed() : Boolean {
+        val result = ContextCompat.checkSelfPermission(this
+            , Manifest.permission.READ_EXTERNAL_STORAGE)
+        return result == PackageManager.PERMISSION_GRANTED
     }
     private fun requestStoragePermission(){
         if (ActivityCompat.shouldShowRequestPermissionRationale(
@@ -105,7 +137,8 @@ class MainActivity : AppCompatActivity() {
         }else{
             requestPermission.launch(arrayOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ))//TODO - add writing external storage
+                ,Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ))
         }
     }
 
@@ -159,4 +192,53 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("Cancel") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
     }
+    private fun getBitMapFromView(view: View) : Bitmap {
+        val returnedBitMap = Bitmap.createBitmap(view.width , view.height , Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(returnedBitMap)
+        val bgDrawable = view.background
+        if (bgDrawable != null)
+            bgDrawable.draw(canvas)
+        else canvas.drawColor(Color.WHITE)
+        view.draw(canvas)
+        return returnedBitMap
+    }
+
+    private suspend fun saveBitMapFile(mBitmap: Bitmap?) : String{
+        var result = ""
+        withContext(Dispatchers.IO){
+            if (mBitmap != null){
+                try {
+                    val bytes = ByteArrayOutputStream()
+                    mBitmap.compress(Bitmap.CompressFormat.PNG , 90, bytes)
+
+                    val f = File(externalCacheDir?.absoluteFile.toString()
+                        + File.separator + "PaintApp" + System.currentTimeMillis()/1000 + ".png")
+
+                    val fo = FileOutputStream(f)
+                    fo.write(bytes.toByteArray())
+                    fo.close()
+
+                    result = f.absolutePath
+
+                    runOnUiThread{
+                        if (result.isNotEmpty()){
+                            Toast.makeText(this@MainActivity
+                            ,"File saved successfully : $result"
+                            ,Toast.LENGTH_SHORT).show()
+                        }else{
+                            Toast.makeText(this@MainActivity
+                                ,"Something went wrong while saving the file !" +
+                                        "Please feedback to @mo99me99 on telegram"
+                                ,Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                }catch (e : Exception){
+                    e.printStackTrace()
+                }
+            }
+        }
+        return result
+    }
+
 }
