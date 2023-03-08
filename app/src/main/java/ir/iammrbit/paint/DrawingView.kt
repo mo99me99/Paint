@@ -22,7 +22,7 @@ class DrawingView(context: Context , attrs : AttributeSet)
     private var mBrushSize : Float = 1F
     var color = Color.BLACK
     private var canvas: Canvas? = null
-    private val mPaths = Stack<CustomPath>()
+    private val mPaths = ArrayList<CustomPath>()
     private val mUndoPaths = Stack<CustomPath>()
 
 
@@ -32,13 +32,13 @@ class DrawingView(context: Context , attrs : AttributeSet)
 
     fun onClickUndo(){
         if (mPaths.isNotEmpty()){
-            mUndoPaths.push(mPaths.pop())
+            mUndoPaths.push(mPaths.removeLast())
             invalidate()
         }
     }
     fun onClickRedo(){
         if (mUndoPaths.isNotEmpty()) {
-            mPaths.push(mUndoPaths.pop())
+            mPaths.add(mUndoPaths.pop())
             invalidate()
         }
     }
@@ -96,6 +96,8 @@ class DrawingView(context: Context , attrs : AttributeSet)
                 mDrawPath!!.lineTo(touchX!! ,touchY!! )
             }
             MotionEvent.ACTION_UP -> {
+                if (mUndoPaths.isNotEmpty())
+                    mUndoPaths.removeLast()
                 mPaths.add(mDrawPath!!)
                 mDrawPath = CustomPath(color, mBrushSize )
             }
