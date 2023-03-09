@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Interpolator
+import android.media.MediaScannerConnection
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -35,10 +37,11 @@ import java.io.FileOutputStream
 
 //    TODO private var mImageButtonCurrentBrushSize : ImageButton? = null
 class MainActivity : AppCompatActivity() {
-    val LifecycleOwner.lifecycleScope: LifecycleCoroutineScope
+    private val LifecycleOwner.lifecycleScope: LifecycleCoroutineScope
         get() = lifecycle.coroutineScope
     private var drawingView:DrawingView? = null
     private var mImageButtonCurrentPaint : ImageButton? = null
+    private var customProgressDialog : Dialog? = null
     private val openGalleryLauncher : ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             result ->
@@ -57,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                     if (isGranted){
                         Toast.makeText(
                             this ,
-                            "Permission granted. Now you can read the storage files."
+                            ""//Permission granted. Now you can read the storage files.
                             ,Toast.LENGTH_SHORT)
                             .show()
                         val pickIntent = Intent(
@@ -110,6 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
         val saveBtn : ImageButton = binding.ibSave
         saveBtn.setOnClickListener {
+            showProgressDialog()
             if (isReadStorageAllowed()){
                 lifecycleScope.launch{
                     val flDrawingView:FrameLayout = binding.flDrawingViewContainer
@@ -221,6 +225,8 @@ class MainActivity : AppCompatActivity() {
                     result = f.absolutePath
 
                     runOnUiThread{
+                        cancelProgressBarDialog()
+                        shareImage(result)
                         if (result.isNotEmpty()){
                             Toast.makeText(this@MainActivity
                             ,"File saved successfully : $result"
@@ -229,7 +235,8 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(this@MainActivity
                                 ,"Something went wrong while saving the file !" +
                                         "Please feedback to @mo99me99 on telegram"
-                                ,Toast.LENGTH_LONG).show()
+                                ,Toast.LENGTH_LONG)
+                                .show()
                         }
                     }
 
@@ -239,6 +246,37 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return result
+    }
+    private fun showProgressDialog(){
+        customProgressDialog = Dialog(this@MainActivity)
+
+        customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+
+        customProgressDialog?.show()
+
+    }
+    private fun cancelProgressBarDialog(){
+        if (customProgressDialog != null){
+            customProgressDialog?.dismiss()
+            customProgressDialog = null
+        }
+    }
+
+    private fun shareImage(result: String){
+        MediaScannerConnection.scanFile(
+            this
+            , arrayOf(result)
+            ,null
+        ){
+            path , uri ->
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.putExtra(Intent.EXTRA_STREAM , uri)
+            shareIntent.type = "image/png"
+            startActivity(Intent.createChooser(shareIntent , "Share"))
+
+        }
+
     }
 
 }
