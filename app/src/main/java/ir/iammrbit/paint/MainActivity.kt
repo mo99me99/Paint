@@ -12,6 +12,7 @@ import android.media.MediaScannerConnection
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -83,6 +84,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
+
+//        full screen settings
+        val actionBar: androidx.appcompat.app.ActionBar? = supportActionBar
+        actionBar!!.hide()
+        this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
