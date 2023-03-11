@@ -22,6 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.get
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
@@ -117,7 +118,8 @@ class MainActivity : AppCompatActivity() {
             if (isReadStorageAllowed()){
                 lifecycleScope.launch{
                     val flDrawingView:FrameLayout = binding.flDrawingViewContainer
-                    saveBitMapFile(getBitMapFromView(flDrawingView))
+                    val sbmf  : String = saveBitMapFile(getBitMapFromView(flDrawingView))
+                    shareImage(sbmf)
                 }
             }
         }
@@ -213,28 +215,26 @@ class MainActivity : AppCompatActivity() {
             if (mBitmap != null){
                 try {
                     val bytes = ByteArrayOutputStream()
-                    mBitmap.compress(Bitmap.CompressFormat.PNG , 90, bytes)
+                    mBitmap.compress(Bitmap.CompressFormat.JPEG , 80, bytes)
 
-                    val f = File(externalCacheDir?.absoluteFile.toString()
-                        + File.separator + "PaintApp" + System.currentTimeMillis()/1000 + ".png")
-
-                    val fo = FileOutputStream(f)
-                    fo.write(bytes.toByteArray())
-                    fo.close()
-
-                    result = f.absolutePath
-
+//                    val f = File(externalCacheDir?.absoluteFile.toString()
+//                        + File.separator + "PaintApp" + System.currentTimeMillis()/1000 + ".png")
+//
+//                    val fo = FileOutputStream(f)
+//                    fo.write(bytes.toByteArray())
+//                    fo.close()
+//
+//                    result = f.absolutePath
+                    result = MediaStore.Images.Media.insertImage(contentResolver, mBitmap, "${System.currentTimeMillis()}" , null);
                     runOnUiThread{
                         cancelProgressBarDialog()
-                        shareImage(result)
                         if (result.isNotEmpty()){
                             Toast.makeText(this@MainActivity
                             ,"File saved successfully : $result"
                             ,Toast.LENGTH_SHORT).show()
                         }else{
                             Toast.makeText(this@MainActivity
-                                ,"Something went wrong while saving the file !" +
-                                        "Please feedback to @mo99me99 on telegram"
+                                ,"Something went wrong while saving the file !"
                                 ,Toast.LENGTH_LONG)
                                 .show()
                         }
@@ -271,9 +271,9 @@ class MainActivity : AppCompatActivity() {
             path , uri ->
             val shareIntent = Intent()
             shareIntent.action = Intent.ACTION_SEND
-            shareIntent.putExtra(Intent.EXTRA_STREAM , uri)
-            shareIntent.type = "image/png"
-            startActivity(Intent.createChooser(shareIntent , "Share"))
+            shareIntent.putExtra(Intent.EXTRA_STREAM , path.toUri())
+            shareIntent.type = "image/jpeg"
+            startActivity(Intent.createChooser(shareIntent , "Share with : "))
 
         }
 
